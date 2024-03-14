@@ -1,0 +1,13 @@
+node_modules/
+all_node/
+app_dom_tieba.js
+
+assert/videos/
+assert/imgs/
+assert/dist_ok/
+*.mp4
+wx_dialog/images/temp/
+
+*.png
+*.jpg
+**/chrome_user_data/**
