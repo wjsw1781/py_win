@@ -11,3 +11,5 @@ wx_dialog/images/temp/
 *.png
 *.jpg
 **/chrome_user_data/**
+
+*.mp3
