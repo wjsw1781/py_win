@@ -54,6 +54,8 @@ async def download_url(url: str, out: str, info: str):
                 f.write(chunk)
 
 
+
+
 # 获取所有视频
 async def get_all_videos(she, end_pn=10):
     init = list(range(1, end_pn + 1))
@@ -131,7 +133,6 @@ def download_video_sync(bvid, aid, filename):
         return video_info
     except Exception as e:
         return False
-        pass
 
 
 if __name__ == '__main__':
