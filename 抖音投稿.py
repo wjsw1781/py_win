@@ -24,7 +24,7 @@ edge_path=r"C:\Users\zq\AppData\Local\Google\Chrome\Application\chrome.exe"
 user_data=os.path.abspath('./chrome_user_data/dy/')
 os.makedirs(user_data,exist_ok=True)
 uploader_url="https://creator.douyin.com/creator-micro/content/upload"
-uploader_url="https://cp.kuaishou.com/article/publish/video"
+# uploader_url="https://cp.kuaishou.com/article/publish/video"
 
 
 
@@ -68,10 +68,10 @@ def kuaishou(worker_tab:ChromiumTab):
 def dy_uploader(worker_tab:ChromiumTab,ok_mp4,index_img):
     # 视频上传逻辑
     worker_tab.set.upload_files(ok_mp4)
-    up_btn=worker_tab.ele('text:上传视频')
+    up_btn=worker_tab.ele('xpath://label')
+    print(up_btn.extra_result)
     up_btn.click()
     worker_tab.wait.upload_paths_inputted()
-    print(up_btn)
 
 # 封面逻辑  需要react辅助了 直接使用react的逻辑干就完了
     page.set.upload_files(index_img)
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     
     table.update_many({'step':temp_status},{'$set':{'step':from_status}})
 
-    for index_id in range(1,291):
+    for index_id in range(9,291):
         data=table.find_one_and_update(
                                 {'step':from_status,'index_id':index_id},
                                 {'$set':{'step':temp_status}}
