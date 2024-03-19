@@ -24,6 +24,7 @@ sys.path.append(basedir)
 
 from utils.utils import *
 
+from test import m3u8_to_mp4
 
 import requests
 headers = {
@@ -59,13 +60,75 @@ def get_play_url(uid_aid):
         
     return res
 
+# 自己实现一套逻辑就是快手的api嘛
+
+import json
+import re
+from DrissionPage import ChromiumOptions,SessionPage,ChromiumPage
+from loguru import logger
+co=ChromiumOptions()
+# co=ChromiumOptions().headless()
+page = ChromiumPage(co)
+
+
+def get_play_url_zq(uid):
+    url=f'https://www.kuaishou.com/short-video/{uid}'
+   
+    page.listen.start('m3u8')  # 开始监听，指定获取包含该文本的数据包
+    page.get(url)  # 访问网址
+
+    for packet in page.listen.steps():
+        m3u8_url=packet.url
+        desc=page.title
+        return m3u8_url,desc
+    return None,None
+
+import os
+import requests
+from concurrent.futures import ThreadPoolExecutor
+from m3u8 import M3U8
+
+def download_ts(url, output_dir):
+    """
+    下载并保存一个 TS 文件
+    
+    :param url: TS 文件的 URL
+    :param output_dir: 要保存的目录路径
+    """
+    filename = os.path.basename(url)
+    output_path = os.path.join(output_dir, filename)
+    response = requests.get(url)
+    with open(output_path, 'wb') as f:
+        f.write(response.content)
+    print(f"{filename} 已下载")
+
+def download_m3u8(url, output_dir):
+    """
+    下载并保存 M3U8 文件以及其中的所有 TS 文件
+    
+    :param url: M3U8 文件的 URL
+    :param output_dir: 要保存的目录路径
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    m3u8_obj = M3U8.load(url)
+    ts_urls = m3u8_obj.segments.uris
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = []
+        for ts_url in ts_urls:
+            futures.append(executor.submit(download_ts, ts_url, output_dir))
+        for future in futures:
+            future.result()
+    print("所有 TS 文件已下载完毕")
+
+
+
 from redisbloom.client import Client
 from pymongo import MongoClient
 import redis 
 #mongodb://root:1213wzwz@139.196.158.152:27017/admin
 
 table_name='douyin_push'
-table_detail=f'{table_name}_detail'
 
 client = MongoClient(host='139.196.158.152', port=27017, username='root', password='1213wzwz', authSource='admin')
 
@@ -93,19 +156,24 @@ def process(data):
     clientCacheKey=data['clientCacheKey']
 
     try:
-        info=get_play_url(clientCacheKey)
-        videoURL=info['voideDeatilVoList'][0]['url']
-        title=info['voideDeatilVoList'][0]['title']
+        # info=get_play_url(clientCacheKey)
+        m3u8_url,desc=get_play_url_zq(clientCacheKey)
+        name=get_safe_title(desc).replace('快手','抖音')+'.mp4'
+        out=os.path.abspath(f'../assert/龙珠/{name}')
+        m3u8_to_mp4(m3u8_url,out)
 
-        desc=get_safe_title(title).replace('快手','抖音')
-        out=os.path.abspath(f'../assert/龙珠/{desc}.mp4')
+        # videoURL=info['voideDeatilVoList'][0]['url']
+        # title=info['voideDeatilVoList'][0]['title']
 
-        download_flag=download_url_big_file_sync(videoURL,out)
+        # desc=get_safe_title(title).replace('快手','抖音')
+        # out=os.path.abspath(f'../assert/龙珠/{desc}.mp4')
 
-        if not(download_flag):
-            raise Exception('下载失败')
+        # download_flag=download_url_big_file_sync(videoURL,out)
 
-        table.update_one({'_id':_id},{'$set':{'step':ok_status,'info':info,'videoURL':videoURL,'ok_mp4':out}})
+        # if not(download_flag):
+        #     raise Exception('下载失败')
+
+        table.update_one({'_id':_id},{'$set':{'step':ok_status,'videoURL':m3u8_url,'ok_mp4':out}})
         logger.success(f"https://www.kuaishou.com/short-video/{clientCacheKey}")
     except Exception as e:
         logger.error(f"https://www.kuaishou.com/short-video/{clientCacheKey}   {e}")

@@ -13,3 +13,5 @@ wx_dialog/images/temp/
 **/chrome_user_data/**
 
 *.mp3
+*.ts
+*.m3u8
