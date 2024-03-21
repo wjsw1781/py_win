@@ -77,7 +77,7 @@ def get_play_url_zq(uid):
     page.listen.start('m3u8')  # 开始监听，指定获取包含该文本的数据包
     page.get(url)  # 访问网址
 
-    for packet in page.listen.steps():
+    for packet in page.listen.steps(timeout=10):
         m3u8_url=packet.url
         desc=page.title
         return m3u8_url,desc
@@ -160,18 +160,8 @@ def process(data):
         m3u8_url,desc=get_play_url_zq(clientCacheKey)
         name=get_safe_title(desc).replace('快手','抖音')+'.mp4'
         out=os.path.abspath(f'../assert/龙珠/{name}')
-        m3u8_to_mp4(m3u8_url,out)
+        # m3u8_to_mp4(m3u8_url,out)
 
-        # videoURL=info['voideDeatilVoList'][0]['url']
-        # title=info['voideDeatilVoList'][0]['title']
-
-        # desc=get_safe_title(title).replace('快手','抖音')
-        # out=os.path.abspath(f'../assert/龙珠/{desc}.mp4')
-
-        # download_flag=download_url_big_file_sync(videoURL,out)
-
-        # if not(download_flag):
-        #     raise Exception('下载失败')
 
         table.update_one({'_id':_id},{'$set':{'step':ok_status,'videoURL':m3u8_url,'ok_mp4':out}})
         logger.success(f"https://www.kuaishou.com/short-video/{clientCacheKey}")
