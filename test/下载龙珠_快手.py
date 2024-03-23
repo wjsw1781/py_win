@@ -2,6 +2,7 @@
 import re
 import signal
 import sys,os
+import threading
 import time
 from urllib.parse import urlparse
 
@@ -85,7 +86,7 @@ def get_play_url_zq(uid):
 
 import os
 import requests
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from m3u8 import M3U8
 
 
@@ -118,46 +119,61 @@ signal_on = True
 signal.signal(signal.SIGINT, close)
 signal.signal(signal.SIGTERM, close)
 
-"""https://v4-vod.kwaicdn.com/ksc2/qb2OvbGnKLAas1p00Ct3Bq1svQb-CqKMBk_uMTn76aOAlha7B5o4Yjt36ztbQ__66dP8NIO3CY1jjVMraUE0rw.m3u8?pkey=AAVeaxsFZqFxY_Dl082UzUQIWMsO5MEzz-NjVedQkAa5yGn4_DqGRADKg233gW-rYELmRBwaJ5qzztJHsUGNobvSGhl724_Jx5f4MvJbO3FT9rWgE_oeTEaKGGManFyIi_4&ss=vp
-"""
-
-"""
-https://v4-vod.kwaicdn.com/ksc2/QvJbDvdZSlKGEUDDmmW-fNtfJV4gLZz29nGY827RQTZ6oHVI7P80YkJqEpoqlaTeavcC0idTj-BJVFzP3QgBJA.m3u8?pkey=AAUBK3uhc7TNDYM34DIGcfhJECn-2w9eP-A_ymOme_v_MKleb0Mopu6uPU9lPaQQ_8_27HDdq3BneaMrXhrhlmEM8-lTnGVz0ho_FzWtt-1bNVhujmHKQvHGfdBRTijJqrs&ss=vp
-
-"""
-
-"""
-https://v4-vod.kwaicdn.com/ksc2/QvJbDvdZSlKGEUDDmmW-fNtfJV4gLZz29nGY827RQTZ6oHVI7P80YkJqEpoqlaTeavcC0idTj-BJVFzP3QgBJA.00003.ts?pkey=AAUBK3uhc7TNDYM34DIGcfhJECn-2w9eP-A_ymOme_v_MKleb0Mopu6uPU9lPaQQ_8_27HDdq3BneaMrXhrhlmEM8-lTnGVz0ho_FzWtt-1bNVhujmHKQvHGfdBRTijJqrs
-
-00152
-"""
 
 from urllib.parse import urljoin
+sub_max_work=10
+sub_executor = ThreadPoolExecutor(sub_max_work)
+
+all_threading=set()
+def sub_process(ts_url,ts_dir):
+    # 获取当前线程id
+    
+    flag,ts_local_name=page.download(ts_url, ts_dir, show_msg=False,file_exists='overwrite')
+    if not(flag):
+        return False
+    return True
+
+
+    pass
 
 def process(data):
     _id=data['_id']
     clientCacheKey=data['clientCacheKey']
     ok_mp4=data['ok_mp4']
 
-    m3u8_file=f'C:/projects/py_win/assert/龙珠/{_id}/m3u8/'
+    m3u8_dir=f'C:/projects/py_win/assert/龙珠/{_id}/m3u8/'
     ts_dir=f'C:/projects/py_win/assert/龙珠/{_id}/ts/'
-    ts_file_list=[]
-    os.makedirs(m3u8_file,exist_ok=True)
+    os.makedirs(m3u8_dir,exist_ok=True)
     try:
         # 调用浏览器下载m3u8文件 统一交给它解析ts 然后还用它下载ts到一个目录下面
         m3u8_url,desc=get_play_url_zq(clientCacheKey)
-        flag,m3u8_local_finename=page.download(m3u8_url, m3u8_file)
+        flag,m3u8_local_finename=page.download(m3u8_url, m3u8_dir,file_exists='overwrite')
         if not(flag):
             raise ValueError('m2u8失败')
         
+        all_tasks=[]
         with open(m3u8_local_finename,'r',encoding='utf-8') as f:
             for row in f:
                 if 'ts?' not in row :
                     continue
                 ts_url=urljoin(m3u8_url,row.strip())
-                flag,ts_local_name=page.download(ts_url, ts_dir,show_msg=False)
-                if not(flag):
-                    raise ValueError('ts下载失败')
+                task=sub_executor.submit(sub_process, ts_url, ts_dir,)
+                all_tasks.append(task)
+
+        have_error=False
+        for task in as_completed(all_tasks):
+            res=task.result()
+            if not(res):
+                have_error=True
+                break
+        if have_error:
+            for task in all_tasks:
+                task.cancel()
+            raise ValueError('有几个ts失败了')
+
+        ok_mp4=f'C:/projects/py_win/assert/龙珠/{_id}/ok.mp4'
+
+
         
         merge_to_mp4(ok_mp4, ts_dir, delete=True)
 
@@ -181,7 +197,9 @@ if __name__ == '__main__':
     max_work = 1
     executor = ThreadPoolExecutor(max_work)
 
+    # table.update_many({'step':ok_status},{'$set':{'step':from_status}})
     table.update_many({'step':temp_status},{'$set':{'step':from_status}})
+    # table.update_many({'step':error_status},{'$set':{'step':from_status}})
 
     while 1:
         if executor._work_queue.qsize()  > max_work:

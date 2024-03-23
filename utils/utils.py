@@ -149,6 +149,6 @@ def merge_to_mp4(dest_file, source_path, delete=True):
         for file in files:
             with open(file, 'rb') as fr:
                 fw.write(fr.read())
-                print(f'\r{file} Merged! Total:{len(files)}', end="     ")
+                # print(f'\r{file} Merged! Total:{len(files)}', end="     ")
             os.remove(file)
  

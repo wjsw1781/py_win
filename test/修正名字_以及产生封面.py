@@ -51,7 +51,9 @@ def process(data):
         index_img_text+='\n'+other_line
         index_img_text=index_img_text.strip()
         index_img_text=index_img_text.replace('.mp4',"")
-        image_path = r"C:\projects\py_win\assert\龙珠\封面\33.png"
+        if '篇' not in index_img_text:
+            index_img_text+='篇'
+        image_path = r"C:\projects\py_win\assert\封面\龙珠封面.png"
         output_path = image_path+f"{index_id}.png"
 
         image_add_text(image_path,index_img_text, output_path)
@@ -65,11 +67,11 @@ def process(data):
 
 
 if __name__ == '__main__':
-    from_status=2
-    temp_status=3
-    ok_status=4
-    other_status=44
-    error_status=14
+    from_status=4
+    temp_status=5
+    ok_status=6
+    other_status=166
+    error_status=16
 
     max_work = 1
     executor = ThreadPoolExecutor(max_work)
