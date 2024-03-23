@@ -63,15 +63,35 @@ def process(data):
     index_img=data['index_img']
     index_id=data['index_id']
 
+    desc='来源于阿b的欣酱_由于某奇异发力___阿b不给力_导致下架_非常可惜_希望抖音能够坚挺_最后_如果喜欢请给原作者_二重转生的欣酱_支持___'
+    title=f"龙珠Z_第{index_id}集_re"
+
 
     try:
-        btn_ele=page.ele('@name=upload-btn',timeout=10)
+        # 触发上传
+        btn_ele=page.ele('t:input@@name=upload-btn@@type=file',timeout=10).next(index=1)
         page.set.upload_files(ok_mp4)
         btn_ele.click()
         page.wait.upload_paths_inputted()
+  
 
-        table.update_one({'_id':_id},{'$set':{'step':ok_status,'index_id':index_id}})
+        # 选择封面
+        page.set.upload_files(index_img)
+        page.ele('t:div@@text:选择封面').click()
+        page.ele('t:div@@text:上传封面').click()
+        page.ele('t:div@@text:上传封面').click()
+        page.ele('xpath://div[@class="semi-upload-drag-area"]').click()
+
+        page.wait.upload_paths_inputted()
+
+        # 填写描述 简介  标题
+        page.ele('xpath://input[@placeholder="好的作品标题可获得更多浏览"]').input(title)
+        page.ele('xpath://div[@data-placeholder="添加作品简介"]').input(title)
+
+        # 点击发布
+
         logger.success(index_id)
+        table.update_one({'_id':_id},{'$set':{'step':ok_status,'index_id':index_id}})
     except Exception as e:
         logger.error(f'{index_id}    {e }')
 
@@ -89,6 +109,7 @@ if __name__ == '__main__':
 
     table.update_many({'step':temp_status},{'$set':{'step':from_status}})
     table.update_many({'step':error_status},{'$set':{'step':from_status}})
+    table.update_many({'step':ok_status},{'$set':{'step':from_status}})
     index_id=0
     while 1:
         if executor._work_queue.qsize()  > max_work:

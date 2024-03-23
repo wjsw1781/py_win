@@ -178,7 +178,7 @@ def process(data):
         merge_to_mp4(ok_mp4, ts_dir, delete=True)
 
 
-        table.update_one({'_id':_id},{'$set':{'step':ok_status,}})
+        table.update_one({'_id':_id},{'$set':{'step':ok_status,'ok_mp4':ok_mp4}})
         logger.success(f"https://www.kuaishou.com/short-video/{clientCacheKey}")
     except Exception as e:
         logger.error(f"https://www.kuaishou.com/short-video/{clientCacheKey}   {e}")
