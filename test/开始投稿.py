@@ -39,7 +39,7 @@ os.makedirs(user_data_dir,exist_ok=True)
 co=ChromiumOptions().set_user_data_path(user_data_dir)
 # co=ChromiumOptions().headless().set_user_data_path(user_data_dir)
 page = ChromiumPage(co)
-page.get('https://creator.douyin.com/creator-micro/content/upload')
+page.get('https://creator.douyin.com/creator-micro/content/publish?enter_from=publish_page')
 page.wait.doc_loaded()
 
 from loguru import logger
@@ -77,16 +77,16 @@ def process(data):
 
         # 选择封面
         page.set.upload_files(index_img)
-        page.ele('t:div@@text:选择封面').click()
-        page.ele('t:div@@text:上传封面').click()
-        page.ele('t:div@@text:上传封面').click()
-        page.ele('xpath://div[@class="semi-upload-drag-area"]').click()
+        # page.ele('xpath://div[@text=选择封面]').click()
+        # page.ele('t:div@@text:上传封面').click()
+        # page.ele('t:div@@text:上传封面').click()
+        # page.ele('xpath://div[@class="semi-upload-drag-area"]').click()
 
-        page.wait.upload_paths_inputted()
+        # page.wait.upload_paths_inputted()
 
         # 填写描述 简介  标题
         page.ele('xpath://input[@placeholder="好的作品标题可获得更多浏览"]').input(title)
-        page.ele('xpath://div[@data-placeholder="添加作品简介"]').input(title)
+        page.ele('xpath://div[@data-placeholder="添加作品简介"]').input(desc)
 
         # 点击发布
 
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     table.update_many({'step':temp_status},{'$set':{'step':from_status}})
     table.update_many({'step':error_status},{'$set':{'step':from_status}})
-    table.update_many({'step':ok_status},{'$set':{'step':from_status}})
+    # table.update_many({'step':ok_status},{'$set':{'step':from_status}})
     index_id=0
     while 1:
         if executor._work_queue.qsize()  > max_work:

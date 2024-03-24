@@ -67,7 +67,7 @@ import json
 import re
 from DrissionPage import ChromiumOptions,SessionPage,ChromiumPage
 from loguru import logger
-co=ChromiumOptions()
+co=ChromiumOptions().no_imgs()
 # co=ChromiumOptions().headless()
 page = ChromiumPage(co)
 
@@ -199,7 +199,7 @@ if __name__ == '__main__':
 
     # table.update_many({'step':ok_status},{'$set':{'step':from_status}})
     table.update_many({'step':temp_status},{'$set':{'step':from_status}})
-    # table.update_many({'step':error_status},{'$set':{'step':from_status}})
+    table.update_many({'step':error_status},{'$set':{'step':from_status}})
 
     while 1:
         if executor._work_queue.qsize()  > max_work:

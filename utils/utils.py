@@ -64,6 +64,8 @@ def remove_element_safely(element):
     parent.insert(parent.index(element), new_text_node)
     parent.remove(element)
 
+
+
 def get_a_name_href(a):
     text=''.join(a.xpath('.//text()'))
     href=a.attrib['href']
@@ -152,3 +154,4 @@ def merge_to_mp4(dest_file, source_path, delete=True):
                 # print(f'\r{file} Merged! Total:{len(files)}', end="     ")
             os.remove(file)
  
+from .bilibili import preview_h5_video_url
