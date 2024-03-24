@@ -73,8 +73,13 @@ css = """
     max-width: 100%;
     min-width: 100%;
 }
-.global_switch{
-z-index:1000
+
+#global_switch{
+    z-index: 1000;
+}
+.control_ele_area{
+    z-index: 1000;
+
 }
 """
 
@@ -88,16 +93,27 @@ with gr.Blocks(title='监控爬虫进程以及进度',css=css,js='./click.js') a
         gr.Checkbox(label='是否开启鼠标xy绘制线条',value=False,elem_id='is_draw_line')
     # 
     with gr.Row():
-        with gr.Column():
-            # gr.CheckboxGroup(label='视频尺寸',choices=['获取上边距','获取下边距','获取左边距','获取右边距'],elem_id='video_size')
-            radio_group = gr.Radio(["获取上边距", "获取下边距", "获取左边距", "获取右边距",'获取完成'], label="视频尺寸", elem_id='video_size')
+        with gr.Column(elem_classes='control_ele_area'):
+            gr.Radio(["获取上边距", "获取下边距", "获取左边距", "获取右边距",'获取完成'], label="视频尺寸", elem_id='video_size')
+
+            gr.Radio(['开启水印标注','关闭水印标注'], label="水印标注",elem_id='is_draw_shuiyin_area')
 
 
         with gr.Column(scale=2):
             gr.HTML(f'<iframe src={h5_url} style="width: 1000px; height: 1000px;"></iframe>')
 
         with gr.Column():
-            gr.Radio(label='视频尺寸结果',choices=['获取上边距','获取下边距','获取左边距','获取右边距','获取完成'],elem_id='video_size_res')
+            with gr.Row(elem_id='video_size_res'):
+                gr.Text(placeholder='获取上边距结果',show_label=False)
+                gr.Text(placeholder='获取下边距结果',show_label=False)
+                gr.Text(placeholder='获取左边距结果',show_label=False)
+                gr.Text(placeholder='获取右边距结果',show_label=False)
+                gr.Text(placeholder='获取完成结果',show_label=False)
+
+            with gr.Row(elem_id='is_draw_shuiyin_area_res'):
+                gr.Text(placeholder='获取水印下边距结果',show_label=False)
+                gr.Text(placeholder='是否已完成水印的工作',show_label=False)
+
 
 
 
