@@ -84,15 +84,12 @@ css = """
 
 
 
-
-# 准备一个gradio画面
+# 准备一个gradio画面   好像明白了 先写ui组件  然后就有了这些组件的引用 此时才能书写函数 绑定到btn上
 import gradio as gr
 
-with gr.Blocks(title='监控爬虫进程以及进度',css=css,js='./click.js') as demo:
-    # 全局组件 他的值要共享给很多组件
 
-    # 进度条
-    slider=None
+
+with gr.Blocks(title='监控爬虫进程以及进度',css=css,js='./click.js') as demo:
 
     # 一些全局开关  是否开启鼠标xy绘制线条  是否屏蔽所有事件
     with gr.Row(elem_id='global_switch' ,elem_classes='control_ele_area'):
@@ -101,49 +98,58 @@ with gr.Blocks(title='监控爬虫进程以及进度',css=css,js='./click.js') a
 
     with gr.Row():
         with gr.Column(elem_classes='control_ele_area'):
-            gr.Radio(["获取左上", "获取右下", '获取完成'], label="视频尺寸", elem_id='video_size')
+            gr.Radio(["获取左上", "获取右下","停止尺寸标注"], label="视频尺寸", elem_id='video_size')
 
-            gr.Radio(['开启水印标注','关闭水印标注'], label="水印标注",elem_id='is_draw_shuiyin_area')
+            gr.Radio(['开始水印标注','停止水印标注'], label="水印标注",elem_id='is_draw_shuiyin_area')
 
-            with gr.Group(elem_id='timeline_info',elem_classes='control_ele_area'):
-                
-                def add_new_row():
-                    # 添加一个文本框用于说明新增内容
-                    gr.Text(placeholder="片段说明", show_label=False)
-                    
-                    
-                    # 添加一个按钮，点击时获取滑块的当前值
-                    def get_slider_value(slider:gr.Slider):
-                        value = slider.value
-                        return value
-                    gr.Button('当前片段进度', elem_id='slider_button',click=get_slider_value(slider))
+            start_btn=gr.Button(value='前置片段删除',elem_id='start_btn')
 
-                                    
-                    # 添加一个单选按钮，点击时新增三个一组的组件
-                    gr.Radio(["可用", "不可用",], label='片段是否可用',show_labels=False)
-                bt_add_pianduan_info=gr.Button('新增片段说明', elem_id='add_new_row_button')
-                bt_add_pianduan_info.click(add_new_row,inputs=None,outputs=None)
+            end_btn=gr.Button(value='后置片段删除',elem_id='end_btn')
+
+            canbe_use_btn=gr.Radio(['不可用','可用'], label="视频是否可用")
+
 
 
 
         with gr.Column(scale=2):
             gr.HTML(f'<iframe src={h5_url} style="width: 1000px; height: 1000px;"></iframe>')
 
-        with gr.Column():
+        with gr.Column() as res:
             with gr.Row(elem_id='video_size_res'):
                 gr.Text(placeholder='获取左上结果',show_label=False)
                 gr.Text(placeholder='获取右下结果',show_label=False)
-                gr.Text(placeholder='获取完成结果',show_label=False)
 
             with gr.Row(elem_id='is_draw_shuiyin_area_res'):
                 gr.Text(placeholder='获取水印下边距结果',show_label=False)
-                gr.Text(placeholder='是否已完成水印的工作',show_label=False)
+
+
+            with gr.Row(elem_id=''):
+                delet_pre=gr.Text(placeholder='前置片段删除至',show_label=False)
+                delet_end=gr.Text(placeholder='前置片段删除至',show_label=False)
+
+            with gr.Row(elem_id=''):
+                canbe_use_res=gr.Text(placeholder='视频是否可用',show_label=False)
 
 
     with gr.Row():
         with gr.Column(scale=2):
             slider=gr.Slider(label='进度条', minimum=0, maximum=length_seconds, step=1, value=0)
+    with gr.Row():
+        with gr.Column(scale=2):
+            submit=gr.Button(value='提交')
 
+    # 一些ui 函数 双向绑定  此时已经打通了前后端不用接住js那么复杂的运行时修改和获取值了
+    start_btn.click(lambda x:seconds_to_time(x),inputs=slider,outputs=delet_pre)
+    end_btn.click(lambda x:seconds_to_time(x),inputs=slider,outputs=delet_end)
+    canbe_use_btn.change(lambda x:x,inputs=canbe_use_btn,outputs=canbe_use_res)
+
+    def get_compents_values(compent):
+        res={}
+        for ii in compent:
+            res[ii]=compent[ii].get_value()
+        return res
+    
+    submit.click(get_compents_values,inputs=res,outputs=None)
 
 demo.launch(server_port=5200,server_name="127.0.0.1",)
     
