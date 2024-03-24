@@ -13,15 +13,15 @@ window.onload = () => {
         }
 
         let now_index = all_top_butoome_left_right.indexOf(now_ele[0])
-        if (now_index == 4) {
+        if (now_index == all_top_butoome_left_right.length - 1) {
             return
         }
         let all_top_butoome_top_bottom_res = Array.from(document.querySelector('#video_size_res').querySelectorAll('textarea'))
 
-
-        let value = x + 'x' + y
-        all_top_butoome_top_bottom_res[now_index].value = value
-        console.log("🚀 ~ fill_video_size ~ value:", value)
+        let old_value = all_top_butoome_top_bottom_res[now_index].value
+        let new_value = x + 'x' + y
+        all_top_butoome_top_bottom_res[now_index].value = new_value
+        console.log("🚀 ~ fill_video_size ~ value:", new_value)
 
 
     }
@@ -29,8 +29,8 @@ window.onload = () => {
     //填写水印下边距
     function fill_watermark_bottom(x, y) {
 
-  
-        let shuiyin_open_ele =       Array.from(document.querySelector('#is_draw_shuiyin_area').querySelectorAll('input'))
+
+        let shuiyin_open_ele = Array.from(document.querySelector('#is_draw_shuiyin_area').querySelectorAll('input'))
         let now_ele = shuiyin_open_ele.filter((item, index) => item.checked == true)
 
         if (now_ele.length == 0) {
@@ -38,16 +38,17 @@ window.onload = () => {
         }
 
         let now_index = shuiyin_open_ele.indexOf(now_ele[0])
-        if (now_index == 1) {
+        if (now_index == shuiyin_open_ele.length - 1) {
             return
         }
 
         let is_draw_shuiyin_area_res_ele = document.querySelector("#is_draw_shuiyin_area_res").querySelectorAll('textarea')
 
+        let old_value = is_draw_shuiyin_area_res_ele[now_index].value
+        let new_value = x + 'x' + y
 
-        let value = x + 'x' + y
-        is_draw_shuiyin_area_res_ele[now_index].value = value
-        console.log("🚀 ~ fill_watermark_bottom ~ value:", value)
+        is_draw_shuiyin_area_res_ele[now_index].value = new_value
+        console.log("🚀 ~ fill_watermark_bottom ~ value:", new_value)
 
     }
 
@@ -110,10 +111,22 @@ window.onload = () => {
     document.addEventListener('click', function (event) {
         var x = event.clientX;
         var y = event.clientY;
+        let targetElement = event.target;
 
+
+        // 检查目标元素及其父级是否具有.control_ele_area类
+        while (targetElement !== null) {
+            if (targetElement.classList.contains('control_ele_area')) {
+                // 如果目标元素或其父级之一具有.control_ele_area类，则拒绝响应
+                return;
+            }
+            // 继续检查父级元素
+            targetElement = targetElement.parentElement;
+        }
 
         // 填写某一个边距信息
         fill_video_size(x, y)
+
         // 填写水印下边距
         fill_watermark_bottom(x, y)
     })

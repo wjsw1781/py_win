@@ -79,24 +79,51 @@ css = """
 }
 .control_ele_area{
     z-index: 1000;
-
 }
 """
+
+
 
 
 # 准备一个gradio画面
 import gradio as gr
 
 with gr.Blocks(title='监控爬虫进程以及进度',css=css,js='./click.js') as demo:
+    # 全局组件 他的值要共享给很多组件
+
+    # 进度条
+    slider=None
+
     # 一些全局开关  是否开启鼠标xy绘制线条  是否屏蔽所有事件
-    with gr.Row(elem_id='global_switch'):
+    with gr.Row(elem_id='global_switch' ,elem_classes='control_ele_area'):
         gr.Checkbox(label='是否开启鼠标xy绘制线条',value=False,elem_id='is_draw_line')
-    # 
+
+
     with gr.Row():
         with gr.Column(elem_classes='control_ele_area'):
-            gr.Radio(["获取上边距", "获取下边距", "获取左边距", "获取右边距",'获取完成'], label="视频尺寸", elem_id='video_size')
+            gr.Radio(["获取左上", "获取右下", '获取完成'], label="视频尺寸", elem_id='video_size')
 
             gr.Radio(['开启水印标注','关闭水印标注'], label="水印标注",elem_id='is_draw_shuiyin_area')
+
+            with gr.Group(elem_id='timeline_info',elem_classes='control_ele_area'):
+                
+                def add_new_row():
+                    # 添加一个文本框用于说明新增内容
+                    gr.Text(placeholder="片段说明", show_label=False)
+                    
+                    
+                    # 添加一个按钮，点击时获取滑块的当前值
+                    def get_slider_value(slider:gr.Slider):
+                        value = slider.value
+                        return value
+                    gr.Button('当前片段进度', elem_id='slider_button',click=get_slider_value(slider))
+
+                                    
+                    # 添加一个单选按钮，点击时新增三个一组的组件
+                    gr.Radio(["可用", "不可用",], label='片段是否可用',show_labels=False)
+                bt_add_pianduan_info=gr.Button('新增片段说明', elem_id='add_new_row_button')
+                bt_add_pianduan_info.click(add_new_row,inputs=None,outputs=None)
+
 
 
         with gr.Column(scale=2):
@@ -104,10 +131,8 @@ with gr.Blocks(title='监控爬虫进程以及进度',css=css,js='./click.js') a
 
         with gr.Column():
             with gr.Row(elem_id='video_size_res'):
-                gr.Text(placeholder='获取上边距结果',show_label=False)
-                gr.Text(placeholder='获取下边距结果',show_label=False)
-                gr.Text(placeholder='获取左边距结果',show_label=False)
-                gr.Text(placeholder='获取右边距结果',show_label=False)
+                gr.Text(placeholder='获取左上结果',show_label=False)
+                gr.Text(placeholder='获取右下结果',show_label=False)
                 gr.Text(placeholder='获取完成结果',show_label=False)
 
             with gr.Row(elem_id='is_draw_shuiyin_area_res'):
@@ -115,18 +140,9 @@ with gr.Blocks(title='监控爬虫进程以及进度',css=css,js='./click.js') a
                 gr.Text(placeholder='是否已完成水印的工作',show_label=False)
 
 
-
-
     with gr.Row():
-        with gr.Column():
-            gr.Text(label='进度条相关')
-
         with gr.Column(scale=2):
-            gr.Slider(label='进度条', minimum=0, maximum=length_seconds, step=1, value=0)
-
-        with gr.Column():
-            gr.Text(label='进度条最终结果')
-
+            slider=gr.Slider(label='进度条', minimum=0, maximum=length_seconds, step=1, value=0)
 
 
 demo.launch(server_port=5200,server_name="127.0.0.1",)
