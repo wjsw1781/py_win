@@ -147,11 +147,11 @@ if __name__ == '__main__':
     # logger.success(f'获取视频成功    ---->   {all_videos}  ')
 
     aid=1051375894
-    bvid='BV1sH4y1j7uX'
+    bvid='BV1UW421c7zm'
     filename='./test.mp4'
 
-    # video_info=download_video_sync(bvid,aid,filename)
-    # logger.success(f'获取视频成功    ---->   {video_info}  ')
+    video_info=download_video_sync(bvid,aid,filename)
+    logger.success(f'获取视频成功    ---->   {video_info}  ')
 
     # last_mp4 = r"C:\projects\zhiqiang_hot\video.mp4"
     # video_scaled_last_mp4 = r"C:\projects\zhiqiang_hot\video_scaled.mp4"
