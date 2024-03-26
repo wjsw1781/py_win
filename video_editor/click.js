@@ -21,6 +21,9 @@ window.onload = () => {
         let old_value = all_top_butoome_top_bottom_res[now_index].value
         let new_value = x + 'x' + y
         all_top_butoome_top_bottom_res[now_index].value = new_value
+        // m模拟触发 
+        all_top_butoome_top_bottom_res[now_index].dispatchEvent(new Event('input', { bubbles: true }));
+
         console.log("🚀 ~ fill_video_size ~ value:", new_value)
 
 
@@ -48,6 +51,8 @@ window.onload = () => {
         let new_value = x + 'x' + y
 
         is_draw_shuiyin_area_res_ele[now_index].value = new_value
+        is_draw_shuiyin_area_res_ele[now_index].dispatchEvent(new Event('input', { bubbles: true }));
+
         console.log("🚀 ~ fill_watermark_bottom ~ value:", new_value)
 
     }
