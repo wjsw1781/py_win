@@ -111,7 +111,7 @@ async def download_video_best(bvid, aid, local_filename):
         os.remove(audio_temp)
         os.remove(video_temp)
 
-
+# 裁剪 以及缩放
 def scale_and_crop_video(video_path, scaled_video_path, size_rate=1.2, watermark_text="永远热爱"):
     # 从中心出发 获取原本的宽高就是裁切啊
     video = mp.VideoFileClip(video_path)
@@ -130,6 +130,12 @@ def scale_and_crop_video(video_path, scaled_video_path, size_rate=1.2, watermark
 
     video.close()
     return scaled_video_path
+
+
+# 获取视频html5可在线观看
+def preview_h5_video_url(bvid, aid):
+    html5_url=f'http://player.bilibili.com/player.html?aid={aid}&bvid={bvid}'
+    return html5_url
 
 
 # 同步获取视频列表 /////////////////////
@@ -152,13 +158,23 @@ if __name__ == '__main__':
     # all_videos=get_all_videos_sync(uid)
     # logger.success(f'获取视频成功    ---->   {all_videos}  ')
 
-    # aid=1051375894
-    # bvid='BV1sH4y1j7uX'
+    aid=1051375894
+    bvid='BV1UW421c7zm'
+    filename='./test.mp4'
 
-    # video_info=download_video_sync(bvid,aid)
-    # logger.success(f'获取视频成功    ---->   {video_info}  ')
+    video_info=download_video_sync(bvid,aid,filename)
+    logger.success(f'获取视频成功    ---->   {video_info}  ')
 
-    last_mp4 = r"C:\projects\zhiqiang_hot\video.mp4"
-    video_scaled_last_mp4 = r"C:\projects\zhiqiang_hot\video_scaled.mp4"
+    # last_mp4 = r"C:\projects\zhiqiang_hot\video.mp4"
+    # video_scaled_last_mp4 = r"C:\projects\zhiqiang_hot\video_scaled.mp4"
+    # scale_and_crop_video(last_mp4, video_scaled_last_mp4, 1.2)
 
-    scale_and_crop_video(last_mp4, video_scaled_last_mp4, 1.2)
+
+    h5_url=sync(preview_h5_video_url(bvid, aid))
+    print("🚀 ~ h5_url:", h5_url)
+
+"""
+<iframe src="//player.bilibili.com/player.html?aid=1051375894&bvid=BV1sH4y1j7uX&cid=1461245640&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+
+"""

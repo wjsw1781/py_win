@@ -1,4 +1,6 @@
+import glob
 import hashlib
+import os
 import httpx
 from loguru import logger
 from lxml import etree
@@ -61,6 +63,8 @@ def remove_element_safely(element):
     new_text_node.text = element.tail or ''
     parent.insert(parent.index(element), new_text_node)
     parent.remove(element)
+
+
 
 def get_a_name_href(a):
     text=''.join(a.xpath('.//text()'))
@@ -140,4 +144,14 @@ from .img_handler import image_add_text
 
 
 
-
+def merge_to_mp4(dest_file, source_path, delete=True):
+    os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+    with open(dest_file, 'wb') as fw:
+        files = glob.glob(source_path + '/*.ts')
+        for file in files:
+            with open(file, 'rb') as fr:
+                fw.write(fr.read())
+                # print(f'\r{file} Merged! Total:{len(files)}', end="     ")
+            os.remove(file)
+ 
+from .bilibili import preview_h5_video_url
