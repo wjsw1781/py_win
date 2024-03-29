@@ -14,6 +14,16 @@
             "env": {
                 "PYDEVD_WARN_SLOW_RESOLVE_TIMEOUT":"30"
             }
+        },
+        {
+            "name": "debug streamlit",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/wangzhiqiang.di/AppData/Roaming/Python/Python38/Scripts/streamlit.exe",  // /home/xx/tmp/venv/bin/streamlit",
+            "args": [
+                "run",
+                "app.py"
+            ]
         }
     ]
 }
