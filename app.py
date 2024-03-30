@@ -4,7 +4,7 @@ import streamlit as st
 
 from pymongo import MongoClient
 
-
+from utils.utils import *
 st.set_page_config(layout="wide")
 st.title("增删改查mongo数据库  + 特定组件组合")
 
@@ -97,16 +97,46 @@ def list_part():
 
 
     df_with_selections = data_df.copy()
-    df_with_selections.insert(0, "Select", False)
-    edited_df = st.data_editor(df_with_selections,hide_index=True,
+    try:
+        df_with_selections.insert(0, "Select", False)
+    except Exception as e:
+        pass
+
+    edited_df = st.data_editor(df_with_selections,
                                column_config={"Select": st.column_config.CheckboxColumn(required=True),
                                },
-                               num_rows="Dynamic",
-                               height=800)
-
+                               num_rows="dynamic",
+                               )
+    # 选择逻辑
     selected_rows = edited_df[edited_df.Select]
     if selected_rows.values!=st.session_state.get('selected_rows').values:
         st.session_state['selected_rows'] = selected_rows
+
+    # 新增逻辑
+    old_last_row = data_df.tail(1)
+    new_last_row = edited_df.tail(1)
+    if not new_last_row['_id'].equals(old_last_row['_id']):
+        key=new_last_row['key'].values[0]
+        if not(key):
+            return
+        item=new_last_row.to_dict('records')[0]
+        item['_id']=md5(key)
+        del item['Select']
+        db[choose_table].update_one({'_id':item['_id']},{'$set':item},upsert=True)
+        #   table.update_one({'_id':_id},{'$setOnInsert':item},upsert=True)
+        
+        
+        
+        
+        
+        print("发生了新增",)
+
+        
+        
+        
+        
+        
+
 
 
 def video_length_to_seconds(time_str):

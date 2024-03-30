@@ -155,3 +155,21 @@ def merge_to_mp4(dest_file, source_path, delete=True):
             os.remove(file)
  
 from .bilibili import preview_h5_video_url
+
+
+def tell_to_wx(info):
+    import requests
+    data={
+    'msgtype': 'text',
+    'text': {
+        'content': info,
+
+    }
+    }
+
+    url='https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=4ff43b98-5254-47ee-844d-471b52f6dd56'
+    requests.post(url=url,json=data)
+
+
+
+

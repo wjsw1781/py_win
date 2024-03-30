@@ -6,33 +6,30 @@ import httpx
 from loguru import logger
 import moviepy.editor as mp
 import requests
-
 cookies = {
-    'buvid3': 'F9670C53-5139-A57B-5C7F-C280ED8E4A3341502infoc',
-    'b_nut': '1708229941',
-    'CURRENT_FNVAL': '4048',
-    '_uuid': '175D372C-E388-10A72-103A3-F10813E1744B442381infoc',
-    'buvid_fp': 'df6ab102a0b730211573395380988f24',
-    'buvid4': '00CA9BFF-6C1F-F076-31E7-9D2E27BF74BD09869-024011307-Gr1Zs5Z0zVLAgOVXKZsVjJTnO1+iOyd46N7HcHg+5m7RDrPbsw9dxKXEM2Y4MaVL',
-    'rpdid': '0zbfvRX90u|Y7ybcr1X|2dl|3w1RByDS',
+    'buvid3': 'F962C52E-1A98-243D-7D97-4CCBE2966F0326637infoc',
+    'b_nut': '1711818926',
+    'i-wanna-go-back': '-1',
+    'b_ut': '7',
+    'b_lsid': 'E385FEB5_18E905BE99B',
+    'bsource': 'search_baidu',
+    '_uuid': 'F101ECB57-AE93-79810-A8FC-668FB3F28A9E26516infoc',
     'enable_web_push': 'DISABLE',
-    'header_theme_version': 'CLOSE',
-    'bp_video_offset_3546561424394511': '891278852954783764',
-    'PVID': '1',
-    'bp_video_offset_102742156': '902763230400610324',
-    'browser_resolution': '1270-854',
+    'FEED_LIVE_VERSION': 'V_HEADER_LIVE_NO_POP',
+    'header_theme_version': 'undefined',
     'home_feed_column': '4',
-    'FEED_LIVE_VERSION': 'V_SIDE_TO_FEED',
-    'bili_ticket': 'eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTAyMTQzNjQsImlhdCI6MTcwOTk1NTEwNCwicGx0IjotMX0.TEdc_skXtciZvMmOIDOKASUtkWvexJuHaFiBSk-yGCE',
-    'bili_ticket_expires': '1710214304',
-    'b_lsid': '81337B4E_18E216195C4',
-    'SESSDATA': '839d1ad1%2C1725509409%2C76910%2A31CjAFpH3SN_vsh3etKZdgCTVKkCvqXKovmFQW8sQex2Ro6yYdYbi_ZAeCkFJsplZhFNASVm1SZTNSRmpDdmktTzdNMzJGQVVIVzlDQVlTTXg5dGtHdm5WaWhib0lyWTEzNFVhQTh4RzlIakREUm1XQkxhb2lKUkd0THJaNXN3T2hTUjhUcXFrMndBIIEC',
-    'bili_jct': '4b38fff3c2697aa9e329abcc635be501',
+    'browser_resolution': '1044-1314',
+    'buvid4': '2F77A97F-A871-F57E-554F-8835BB72B8D628834-024033017-dUPAC4eUHoBN8ubm2FnGbytKnBfoGDNJ1XWjUSvJ8OcGDDH4ObwKOgotCksXSOiX',
+    'buvid_fp': 'bc037d32654f6edba6ddcaed6f61eab0',
+    'SESSDATA': '62ce526a%2C1727370955%2C773ad%2A31CjAu1t684fEQ3u8qr-eQpF9H9jVjItu1UWwAXeFlkdFY0BCW3QprNFco7IXCPg3AO40SVkVCRGN5SElTMERCTHdrUGdfclFyeW9DSFVpQnhRQlJUNE84ZTFqakNvSDRpUlkwTlp5N0JUTGs5SnczRzlwNWxsaFR6Mk1BQkJURG5CYTBLVnJlSE5BIIEC',
+    'bili_jct': '2376845b83742873f25953ad3f6577d2',
     'DedeUserID': '102742156',
     'DedeUserID__ckMd5': '68d517f8697ef166',
-    'sid': 'mn06wm2n',
+    'sid': 'dfawlj6d',
+    'bili_ticket': 'eyJhbGciOiJIUzI1NiIsImtpZCI6InMwMyIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTIwNzgxNjMsImlhdCI6MTcxMTgxODkwMywicGx0IjotMX0.pUjz9Vyc_FInLcmbHTFJLvQRO_W_tIHbc4Nq6B4mF7s',
+    'bili_ticket_expires': '1712078103',
+    'PVID': '1',
 }
-
 credential = Credential.from_cookies(cookies)
 
 from bilibili_api import video, sync, user, comment, session, HEADERS
@@ -73,19 +70,26 @@ def download_url_big(url: str, out: str, info: str):
 async def get_all_videos(she, end_pn=10):
     init = list(range(1, end_pn + 1))
     all_videos = []
+    max_try=10
+    cur_try=0
     # 如果失败了就重试
     for index, pn in enumerate(init):
         try:
             videos = await she.get_videos(0, pn, 30)
         except Exception as e:
             videos = []
-            logger.error(f"{index} /{len(init)} -----> 页获取失败 直接记录了")
+            logger.error(f"{index} /{len(init)} {e} -----> 页获取失败 直接记录了")
             time.sleep(10)
             init.append(pn)
+            cur_try+=1
+            if cur_try>max_try:
+                logger.error(f"{index} /{len(init)} 重试次数过多 退出")
+                break
+            continue
             continue
         videos_meta = videos['list']['vlist']
         all_videos += videos_meta
-        logger.success(f"{pn}  -----> {len(all_videos)}   获取陈工")
+        logger.debug(f"{pn}  -----> {len(all_videos)}   获取陈工")
         time.sleep(5)
     return all_videos
 
