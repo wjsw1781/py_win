@@ -220,7 +220,9 @@ def detail_part():
         st.markdown(iframe_table, unsafe_allow_html=True)
 
     # 图片显示
-    pic_list=eval(get_ziduan("all_wx_frame_pic_urls"))
+    pic_list=get_ziduan("all_wx_frame_pic_urls")
+    if '[' in pic_list and type(pic_list)==str:
+        pic_list=eval(pic_list)
 
     pic=pic_list[0]
     response = requests.get(pic)
