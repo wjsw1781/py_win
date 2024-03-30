@@ -52,12 +52,6 @@ def db_tables():
             st.session_state['choose_table'] = selected_table
 
 
-
-# 组件列表
-def components():
-
-    pass
-
 # 列表页
 def list_part():
 
@@ -104,10 +98,7 @@ def main():
     # 侧边栏
     db_tables()
    
-    # 组件列表
-    components()
-
-
+  
 
     # 主体内容
     list, detail = st.columns(2,gap='small')
