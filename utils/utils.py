@@ -172,4 +172,4 @@ def tell_to_wx(info):
 
 
 
-
+from .wx_img_uploader import aio_save_media_by_wx

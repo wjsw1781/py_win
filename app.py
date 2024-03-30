@@ -218,12 +218,7 @@ def detail_part():
 
 
     # 图片显示
-    pic_list=[
-        r"C:\projects\py_win\extracted_frames\frame_0.jpg",
-        r"C:\projects\py_win\extracted_frames\frame_1.jpg",
-        r"C:\projects\py_win\extracted_frames\frame_2.jpg",
-        r"C:\projects\py_win\extracted_frames\frame_3.jpg",
-    ]
+    pic_list=get_ziduan("all_wx_frame_pic_urls")
 
     pic=pic_list[0]
     image = Image.open(pic)

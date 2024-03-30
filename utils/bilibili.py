@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+import re
+import sys,os
+basedir = os.path.dirname(__file__)
+parent_dir = os.path.dirname(basedir)
+
+project_dir=basedir 
+# 遍历所有父节点目录 如果存在readme.md文件 就返回那个目录
+while True:
+    if os.path.exists(os.path.join(project_dir, 'readme.md')):
+        break
+    project_dir = os.path.dirname(project_dir)
+    if project_dir==os.path.dirname(project_dir):
+        raise ValueError('未找到项目根目录')
+
+
+
+
+
+
+
 import hashlib
 import os
 import time
@@ -35,7 +56,7 @@ credential = Credential.from_cookies(cookies)
 from bilibili_api import video, sync, user, comment, session, HEADERS
 from PIL import Image
 
-FFMPEG_PATH = os.path.abspath('./ffmpeg.exe')
+FFMPEG_PATH = os.path.abspath(f'{project_dir}/ffmpeg.exe')
 
 
 async def download_url(url: str, out: str, info: str):
@@ -158,7 +179,8 @@ def extract_four_frames(video_path):
     frame_times = [duration * (i + 0.5) / 4 for i in range(4)]
     
     # Create a directory to save the frames
-    frames_dir = 'extracted_frames'
+    dir_name=os.path.dirname(video_path)
+    frames_dir = f'{dir_name}/extracted_frames'
     os.makedirs(frames_dir, exist_ok=True)
     
     # Extract frames at the specified time points
@@ -188,7 +210,7 @@ def get_all_videos_sync(uid, end_pn=3):
 def download_video_sync(bvid, aid, filename):
     try:
         video_info = sync(download_video_best(bvid, aid, filename))
-        return video_info
+        return True
     except Exception as e:
         return False
 

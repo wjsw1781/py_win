@@ -82,16 +82,23 @@ def into_db():
 
 
 def download_video():
+    wx_gzh=aio_save_media_by_wx()
+
     from_step=video_item.is_spider_to_db
     end_step=video_item.is_download_local
+    error_step=end_step+video_item.error_reason
 
-    for ii in table_two.find({'step':video_item.is_spider_to_db}):
+    table_two.update_many({'step':error_step},{'$set':{'step':from_step}})
+    # table_two.update_many({'step':end_step},{'$set':{'step':from_step}})
+
+    for ii in table_two.find({'step':from_step}):
         try:
             _id=ii['_id']
             bvid=ii['bvid']
             aid=ii['aid']
             safe_title=ii['safe_title']
             local_name = os.path.abspath(f'./assert/大型纪录片/{safe_title}')
+            os.makedirs(local_name, exist_ok=True)
             pic_index = f"{local_name}/index.jpg"
             video_mp4_name = f"{local_name}/video.mp4"
             # 人工质检后的最终产出
@@ -102,19 +109,30 @@ def download_video():
                 ff.write(requests.get(pic_index_url).content)
 
             # 下载视频
-            flag = bilibili.download_video_sync(bvid=bvid, aid=aid, filename=video_mp4_name)
-            if not (flag):
-                raise ValueError(f"下载视频失败  bvid  {bvid}")
-            table_two.update_one({'_id':_id},{'$set':{"step":end_step}})
+            if not(os.path.exists(video_mp4_name)):
+                flag = bilibili.download_video_sync(bvid=bvid, aid=aid, filename=video_mp4_name)
+                if not (flag):
+                    raise ValueError(f"下载视频失败  bvid  {bvid}")
 
             # 抽帧
-            try:
-                frames_dir = bilibili.extract_four_frames(video_mp4_name)
+            all_frame_pick = bilibili.extract_four_frames(video_mp4_name)
+            if len(all_frame_pick)!=4:
+                raise ValueError(f"抽帧失败  bvid  {bvid}")
 
+            # pic_frames=[for i in all_frame_pick]
+            all_wx_frame_pic_urls=[]
+            try:
+                for fram_local_path in all_frame_pick:
+                    data=wx_gzh._upload_local_media_to_wx_https(fram_local_path)
+                    url=data[1]
+                    all_wx_frame_pic_urls.append(url)
             except Exception as e:
-                raise ValueError(f"抽帧失败  bvid  {bvid}  error  {e}")
+                pass
+            
+            table_two.update_one({'_id':_id},{'$set':{"step":end_step,'all_wx_frame_pic_urls':all_wx_frame_pic_urls}})
+            logger.success(f"{curent_time}  {safe_title}  下载完成  抽帧完成   上传完成")
         except Exception as e:
-            table_two.update_one({'_id':_id},{'$set':{"step":end_step+video_item.error_reason,'error_reason':"下载过程出错"+str(e)}})
+            table_two.update_one({'_id':_id},{'$set':{"step":error_step,'error_reason':"下载过程出错"+str(e)}})
 
 
 
@@ -128,11 +146,10 @@ def upload_video(item):
 curent_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 if __name__ == '__main__':
     try:
-        add_count=into_db()
-        
-        if add_count==0:
-            raise ValueError(f"没有成功爬取到视频信息 by_uid 结果为 add_count  {add_count}")
-        logger.success(f"{curent_time}  爬取陈工  {add_count} 条入库")
+        # add_count=into_db()
+        # if add_count==0:
+        #     raise ValueError(f"没有成功爬取到视频信息 by_uid 结果为 add_count  {add_count}")
+        # logger.success(f"{curent_time}  爬取陈工  {add_count} 条入库")
 
 
         download_video()
