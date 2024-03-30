@@ -278,3 +278,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+""""
+streamlit run /root/py_win/app.py --server.address=0.0.0.0
+
+
+"""
