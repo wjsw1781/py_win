@@ -244,7 +244,11 @@ def detail_part():
     if st.button("点击提交确认 水印和长度没问题"):
         # 提交修改
         table=get_db()[st.session_state['choose_table']]
-        table.update_one({"_id":_id},{"$set":{"new_shuiyin_bili":new_shuiyin_bili,"new_shijianzhou_delete_length":new_shijianzhou_delete_length}})
+        table.update_one({"_id":_id},{"$set":{
+            "step":3,
+            "new_shuiyin_bili":new_shuiyin_bili,
+            "new_shijianzhou_delete_length":new_shijianzhou_delete_length
+            }})
         table.update_many({"mid":mid},{"$set":{"shuiyin_bili":new_shuiyin_bili,"shijianzhou_delete_length":new_shijianzhou_delete_length}})
 
 
