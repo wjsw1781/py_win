@@ -36,6 +36,7 @@ cookies = {
 credential = Credential.from_cookies(cookies)
 
 from bilibili_api import video, sync, user, comment, session, HEADERS
+from PIL import Image
 
 FFMPEG_PATH = os.path.abspath('./ffmpeg.exe')
 
@@ -138,13 +139,40 @@ def preview_h5_video_url(bvid, aid):
     return html5_url
 
 # 获取视频某一帧画面
-async def get_one_frame_pic(bvid, aid,):
-    video_ele = video.Video(bvid=bvid, aid=aid, credential=credential)
-    video_info = await video_ele.get_video_snapshot()
-    return video_info
+from moviepy.editor import VideoFileClip
+import os
 
+def extract_four_frames(video_path):
+    # Load the video clip
+    clip = VideoFileClip(video_path)
+    
+    # Get the duration of the video
+    duration = clip.duration
+    
+    # Define the time points for the four frames
+    frame_times = [duration * (i + 0.5) / 4 for i in range(4)]
+    
+    # Create a directory to save the frames
+    frames_dir = 'extracted_frames'
+    os.makedirs(frames_dir, exist_ok=True)
+    
+    # Extract frames at the specified time points
+    for i, time in enumerate(frame_times):
+        # Set the frame to be extracted at the specified time point
+        frame = clip.get_frame(time)
+        
+        # Save the frame as an image file
+        image = Image.fromarray(frame)
+            
+        # Save the image as a JPEG file
+        frame_path = os.path.join(frames_dir, f'frame_{i}.jpg')
+        image.save(frame_path)
 
-    pass
+    # Close the video clip
+    clip.close()
+    
+    return frames_dir
+
 # 同步获取视频列表 /////////////////////
 def get_all_videos_sync(uid, end_pn=3):
     she = user.User(uid, credential=credential)
@@ -170,7 +198,7 @@ if __name__ == '__main__':
     filename='./test.mp4'
 
     # video_info=download_video_sync(bvid,aid,filename)
-    # logger.success(f'获取视频成功    ---->   {video_info}  ')
+    # logger.success(f'下载视频成功    ---->   {video_info}  ')
 
     # last_mp4 = r"C:\projects\zhiqiang_hot\video.mp4"
     # video_scaled_last_mp4 = r"C:\projects\zhiqiang_hot\video_scaled.mp4"
@@ -180,7 +208,7 @@ if __name__ == '__main__':
     # h5_url=sync(preview_h5_video_url(bvid, aid))
     # print("🚀 ~ h5_url:", h5_url)
 
-    h5_url=sync(get_one_frame_pic(bvid, aid))
+    h5_url=extract_four_frames(filename)
     print("🚀 ~ h5_url:", h5_url)
 
 """

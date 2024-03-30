@@ -34,5 +34,19 @@ pip install loguru requests pywebio DrissionPage bilibili-api-python httpx movie
 本质上都是对状态的查看  以及修改
 
 
+b站爬取的任何主题的视频都要增加两个字段一个水印信息 一个时间轴移除信息
+shuiyin_bili
+shijianzhou_delete_length
+
+人工质检可能会新增额外的两个
+new_shuiyin_bili
+new_shijianzhou_delete_length
+
+初步确认 二次确认
+
+最后一个就是阿里云要部署streamlit进行查看  还要对每个视频存储4张截图(可以存放到微信公众号 但是感觉不稳定有变数)
+
+
+
 
 

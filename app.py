@@ -1,8 +1,6 @@
 import functools
 import pandas as pd
 import streamlit as st
-from pages import  detail_page,list_page
-
 
 from pymongo import MongoClient
 
@@ -18,6 +16,7 @@ page_number
 page_size
 data_df
 selected_rows
+video_info    包含水印  时间轴  完整描述
 
 """
 st.session_state['choose_table']=None
@@ -26,27 +25,40 @@ st.session_state['page_size']=30
 st.session_state['data_df']=pd.DataFrame({})
 st.session_state['selected_rows']=pd.DataFrame({})
 
+# detail页需要的状态变量
+st.session_state['video_info']={"shuiyin":[],"shijianzhou":[]}
+st.session_state['shijianzhou_delete_length']=3
+st.session_state['shuiyin_bili']=0.2
 
 
 @st.cache_resource
 def get_db():
     client = MongoClient(host='139.196.158.152', port=27017, username='root', password='1213wzwz', authSource='admin')
-
     db = client.zhiqiang_hot
     return db
 
-@st.cache_data
 def get_data_from_mongodb_by_page(table_name,page_number, page_size=5):
     db = get_db()
     table = db[table_name]
     skip_count = (page_number - 1) * page_size
-    
     # 查询数据并应用分页逻辑
     cursor = table.find().skip(skip_count).limit(page_size)
     page_data=list(cursor)
     print(len(page_data))
     
     return pd.DataFrame(page_data)
+
+# 标记水印位置
+from PIL import Image, ImageDraw
+def draw_line_on_image(image_path, slider_value):
+    image = Image.open(image_path)
+    width, height = image.size
+    line_image = Image.new("RGB", (width, height))
+    draw = ImageDraw.Draw(line_image)
+    draw.line([(0, slider_value), (width, slider_value)], fill="red", width=3)
+    combined_image = Image.blend(image, line_image, alpha=0.5)
+    return combined_image
+
 
 # 数据列表
 def db_tables():
@@ -96,6 +108,23 @@ def list_part():
     if selected_rows.values!=st.session_state.get('selected_rows').values:
         st.session_state['selected_rows'] = selected_rows
 
+
+def video_length_to_seconds(time_str):
+    # 分割分钟和秒钟部分
+    minutes, seconds = map(int, time_str.split(':'))
+    # 将分钟和秒钟转换为总秒数
+    total_seconds = minutes * 60 + seconds
+    return total_seconds
+
+def seconds_to_video_length(seconds):
+    # 计算分钟和秒钟部分
+    minutes = seconds // 60
+    seconds_remainder = seconds % 60
+    # 格式化为分秒形式字符串
+    time_str = '{:02d}:{:02d}'.format(minutes, seconds_remainder)
+    return time_str
+
+
 # 详情页
 def detail_part():
     # 针对b站的水印进行标注的详情页   要标注反馈一些信息到monggo
@@ -107,18 +136,95 @@ def detail_part():
     if 'bvid' not in filed_name:
         return
     
+    # 获取字段值
+    def get_ziduan(ziduan):
+        try:
+            bvid_indexof=filed_name.index(ziduan)
+            bvid=selected_rows_obj[0][bvid_indexof]
+            return bvid
+        except Exception as e:
+            return None
+        
+    # 最终修改字段显示
+    _id=get_ziduan("_id")
+    mid=get_ziduan("mid")
+    length=get_ziduan("length")
+    shuiyin_bili=get_ziduan("shuiyin_bili")
+    shijianzhou_delete_length=get_ziduan("shijianzhou_delete_length")
+
+    if shuiyin_bili==None or shijianzhou_delete_length==None:
+        shuiyin_bili=0.2
+        shijianzhou_delete_length=3
+
+    st.session_state['shijianzhou_delete_length']=shijianzhou_delete_length
+    st.session_state['shuiyin_bili']=shuiyin_bili
+
+    shijianzhou_changdu=video_length_to_seconds(length)
+
+# 时间轴标注结果part  有一个old  一个new
+    shijianzhou_ele,shijianzhou_res=st.columns(2)
+    with shijianzhou_ele:
+        new_shijianzhou_delete_length = st.slider("标注时间轴", 0, shijianzhou_changdu,st.session_state['shijianzhou_delete_length'])
+
+
+    with shijianzhou_res:
+        shijianzhou_res_info=seconds_to_video_length(new_shijianzhou_delete_length)
+        st.text_input(label="从头删除到",value=shijianzhou_res_info)
+
+    # 用户进行修改后   肯定以用户为准
+    if new_shijianzhou_delete_length!=st.session_state.get('shijianzhou_delete_length'):
+        st.session_state['new_shijianzhou_delete_length'] = new_shijianzhou_delete_length
+        st.success(f"用户侧认为这个结果不对,需要重新修改: {new_shijianzhou_delete_length}")
+
+
+
     #视频显示 
     bvid_indexof=filed_name.index('bvid')
     bvid=selected_rows_obj[0][bvid_indexof]
     videod_url=f'http://player.bilibili.com/player.html?bvid={bvid}'
     iframe_table=f"""<iframe id="my-iframe" src="{videod_url}" width="100%" height="800px" frameborder="0"></iframe>"""
-    st.markdown(iframe_table,unsafe_allow_html=True)
+    with st.expander("点击展开/收起原视频"):
+        st.markdown(iframe_table, unsafe_allow_html=True)
+
 
     # 图片显示
+    pic_list=[
+        r"C:\projects\py_win\extracted_frames\frame_0.jpg",
+        r"C:\projects\py_win\extracted_frames\frame_1.jpg",
+        r"C:\projects\py_win\extracted_frames\frame_2.jpg",
+        r"C:\projects\py_win\extracted_frames\frame_3.jpg",
+    ]
+
+    pic=pic_list[0]
+    image = Image.open(pic)
+    width, height = image.size
+    shuiyin_info,shuiyin_res=st.columns(2)
+
+    with shuiyin_info:
+        new_shuiyin_height = st.slider("标注水印位置", 0.0, float(height), height*st.session_state['shuiyin_bili'],step=1.0)
+        new_shuiyin_bili=new_shuiyin_height/height
+    with shuiyin_res:
+        st.text_input(label="当前水印比例",value=new_shuiyin_bili)
+
+    if new_shuiyin_bili!=st.session_state['shuiyin_bili']:
+        st.session_state['new_shuiyin_bili']=new_shuiyin_bili
+        st.success(f"用户侧认为这个结果不对,需要重新修改: {new_shuiyin_height}")
+
+    if st.button("点击提交确认 水印和长度没问题"):
+        # 提交修改
+        table=get_db()[st.session_state['choose_table']]
+        table.update_one({"_id":_id},{"$set":{"new_shuiyin_bili":new_shuiyin_bili,"new_shijianzhou_delete_length":new_shijianzhou_delete_length}})
+        table.update_many({"mid":mid},{"$set":{"shuiyin_bili":new_shuiyin_bili,"shijianzhou_delete_length":new_shijianzhou_delete_length}})
 
 
-    # 结果判定
-    pass
+    with st.expander("点击展开/收起片段的原图",expanded=True):
+        combined_image_first = draw_line_on_image(pic, new_shuiyin_height)
+        st.image(combined_image_first)
+        for pic in pic_list[1:]:
+            combined_image_other = draw_line_on_image(pic, new_shuiyin_height)
+            st.image(combined_image_other)
+
+
 
 
 def main():
