@@ -98,7 +98,7 @@ def list_part():
 
 # 详情页
 def detail_part():
-    # 针对b站的水印进行标注的详情页
+    # 针对b站的水印进行标注的详情页   要标注反馈一些信息到monggo
     selected_rows:pd.DataFrame=st.session_state['selected_rows']
     selected_rows_obj=selected_rows.values.tolist()
     filed_name=selected_rows.columns.to_list()
@@ -107,16 +107,17 @@ def detail_part():
     if 'bvid' not in filed_name:
         return
     
-    
+    #视频显示 
     bvid_indexof=filed_name.index('bvid')
     bvid=selected_rows_obj[0][bvid_indexof]
     videod_url=f'http://player.bilibili.com/player.html?bvid={bvid}'
     iframe_table=f"""<iframe id="my-iframe" src="{videod_url}" width="100%" height="800px" frameborder="0"></iframe>"""
-
     st.markdown(iframe_table,unsafe_allow_html=True)
 
     # 图片显示
 
+
+    # 结果判定
     pass
 
 

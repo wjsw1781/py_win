@@ -137,7 +137,14 @@ def preview_h5_video_url(bvid, aid):
     html5_url=f'http://player.bilibili.com/player.html?aid={aid}&bvid={bvid}'
     return html5_url
 
+# 获取视频某一帧画面
+async def get_one_frame_pic(bvid, aid,):
+    video_ele = video.Video(bvid=bvid, aid=aid, credential=credential)
+    video_info = await video_ele.get_video_snapshot()
+    return video_info
 
+
+    pass
 # 同步获取视频列表 /////////////////////
 def get_all_videos_sync(uid, end_pn=3):
     she = user.User(uid, credential=credential)
@@ -162,15 +169,18 @@ if __name__ == '__main__':
     bvid='BV1UW421c7zm'
     filename='./test.mp4'
 
-    video_info=download_video_sync(bvid,aid,filename)
-    logger.success(f'获取视频成功    ---->   {video_info}  ')
+    # video_info=download_video_sync(bvid,aid,filename)
+    # logger.success(f'获取视频成功    ---->   {video_info}  ')
 
     # last_mp4 = r"C:\projects\zhiqiang_hot\video.mp4"
     # video_scaled_last_mp4 = r"C:\projects\zhiqiang_hot\video_scaled.mp4"
     # scale_and_crop_video(last_mp4, video_scaled_last_mp4, 1.2)
 
 
-    h5_url=sync(preview_h5_video_url(bvid, aid))
+    # h5_url=sync(preview_h5_video_url(bvid, aid))
+    # print("🚀 ~ h5_url:", h5_url)
+
+    h5_url=sync(get_one_frame_pic(bvid, aid))
     print("🚀 ~ h5_url:", h5_url)
 
 """
