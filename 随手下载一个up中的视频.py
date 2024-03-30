@@ -29,8 +29,8 @@ logger.add('./logs/{time:YYYY-MM-DD}test.log', format='{time} {level} {message}'
 if __name__ == '__main__':
 
     uids = [
-        3494376900659223,
         498421499, 546562340849750, 3546576924445007,
+        3494376900659223,
         1068765283, 1701648043, 620314864, 3461563927235282,
         1524045459, 1628708018,
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
             bvid = video['bvid']
             aid = video['aid']
 
-            local_name = os.path.abspath(f'./assert/{title}')
+            local_name = os.path.abspath(f'./assert/大型纪录片/{title}')
             pic_index = f"{local_name}/index.jpg"
             pic_index_url = video['pic']
             video_mp4_name = f"{local_name}/video.mp4"
@@ -56,15 +56,12 @@ if __name__ == '__main__':
             if os.path.exists(video_mp4_name):
                 if os.path.exists(video_mp4_namegood):
                     continue
-                bilibili.scale_and_crop_video(video_mp4_name, video_mp4_namegood, 1.2)
-                continue
-            import requests
 
+            import requests
             with open(pic_index, 'wb') as ff:
                 ff.write(requests.get(pic_index_url).content)
 
             flag = bilibili.download_video_sync(bvid=bvid, aid=aid, filename=video_mp4_name)
-            time.sleep(20)
             if not (flag):
                 logger.error(f"下载失败---->  {video_mp4_name}")
                 continue

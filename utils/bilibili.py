@@ -5,6 +5,7 @@ from bilibili_api import Credential
 import httpx
 from loguru import logger
 import moviepy.editor as mp
+import requests
 
 cookies = {
     'buvid3': 'F9670C53-5139-A57B-5C7F-C280ED8E4A3341502infoc',
@@ -54,7 +55,18 @@ async def download_url(url: str, out: str, info: str):
                 f.write(chunk)
 
 
-
+def download_url_big(url: str, out: str, info: str):
+    # 下载函数
+    with requests.get(url, stream=True, headers=HEADERS) as resp:
+        resp.raise_for_status()
+        length = resp.headers.get('content-length')
+        with open(out, 'wb') as f:
+            process = 0
+            for chunk in resp.iter_content(chunk_size=1024):
+                if not chunk:
+                    break
+                process += len(chunk)
+                f.write(chunk)
 
 # 获取所有视频
 async def get_all_videos(she, end_pn=10):
