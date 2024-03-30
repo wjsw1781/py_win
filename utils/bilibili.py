@@ -147,6 +147,7 @@ from moviepy.editor import VideoFileClip
 import os
 
 def extract_four_frames(video_path):
+    all_img_path = []
     # Load the video clip
     clip = VideoFileClip(video_path)
     
@@ -171,11 +172,11 @@ def extract_four_frames(video_path):
         # Save the image as a JPEG file
         frame_path = os.path.join(frames_dir, f'frame_{i}.jpg')
         image.save(frame_path)
-
+        all_img_path.append(frame_path)
     # Close the video clip
     clip.close()
     
-    return frames_dir
+    return all_img_path
 
 # 同步获取视频列表 /////////////////////
 def get_all_videos_sync(uid, end_pn=3):

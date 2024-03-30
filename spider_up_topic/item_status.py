@@ -18,6 +18,6 @@ class Vidoe_Item_Status:
     is_up_4_pic_to_wx = 2
     is_human_ok=3
     is_tougao_success=4
-    error_reason=""
+    error_reason=100
 
 
