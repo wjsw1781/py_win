@@ -1,4 +1,5 @@
 import functools
+from io import BytesIO
 import pandas as pd
 import streamlit as st
 
@@ -51,7 +52,9 @@ def get_data_from_mongodb_by_page(table_name,page_number, page_size=5):
 # 标记水印位置
 from PIL import Image, ImageDraw
 def draw_line_on_image(image_path, slider_value):
-    image = Image.open(image_path)
+    response = requests.get(image_path)
+    image = Image.open(BytesIO(response.content))
+    # image = Image.open(image_path)
     width, height = image.size
     line_image = Image.new("RGB", (width, height))
     draw = ImageDraw.Draw(line_image)
@@ -216,17 +219,18 @@ def detail_part():
     with st.expander("点击展开/收起原视频"):
         st.markdown(iframe_table, unsafe_allow_html=True)
 
-
     # 图片显示
-    pic_list=get_ziduan("all_wx_frame_pic_urls")
+    pic_list=eval(get_ziduan("all_wx_frame_pic_urls"))
 
     pic=pic_list[0]
-    image = Image.open(pic)
+    response = requests.get(pic)
+    image = Image.open(BytesIO(response.content))
+    # image = Image.open(pic)
     width, height = image.size
     shuiyin_info,shuiyin_res=st.columns(2)
 
     with shuiyin_info:
-        new_shuiyin_height = st.slider("标注水印位置", 0.0, float(height), height*st.session_state['shuiyin_bili'],step=1.0)
+        new_shuiyin_height = st.slider("标注水印位置", 0.0, float(height), float(height*st.session_state['shuiyin_bili']),step=1.0)
         new_shuiyin_bili=new_shuiyin_height/height
     with shuiyin_res:
         st.text_input(label="当前水印比例",value=new_shuiyin_bili)

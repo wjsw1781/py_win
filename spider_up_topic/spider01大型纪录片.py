@@ -89,7 +89,7 @@ def download_video():
     error_step=end_step+video_item.error_reason
 
     table_two.update_many({'step':error_step},{'$set':{'step':from_step}})
-    # table_two.update_many({'step':end_step},{'$set':{'step':from_step}})
+    table_two.update_many({'step':end_step},{'$set':{'step':from_step}})
 
     for ii in table_two.find({'step':from_step}):
         try:
@@ -115,19 +115,20 @@ def download_video():
                     raise ValueError(f"下载视频失败  bvid  {bvid}")
 
             # 抽帧
-            all_frame_pick = bilibili.extract_four_frames(video_mp4_name)
-            if len(all_frame_pick)!=4:
-                raise ValueError(f"抽帧失败  bvid  {bvid}")
-
-            # pic_frames=[for i in all_frame_pick]
             all_wx_frame_pic_urls=[]
-            try:
-                for fram_local_path in all_frame_pick:
-                    data=wx_gzh._upload_local_media_to_wx_https(fram_local_path)
-                    url=data[1]
-                    all_wx_frame_pic_urls.append(url)
-            except Exception as e:
-                pass
+            if 'all_wx_frame_pic_urls' not in ii :
+                all_frame_pick = bilibili.extract_four_frames(video_mp4_name)
+                if len(all_frame_pick)!=4:
+                    raise ValueError(f"抽帧失败  bvid  {bvid}")
+
+                # pic_frames=[for i in all_frame_pick]
+                try:
+                    for fram_local_path in all_frame_pick:
+                        data=wx_gzh._upload_local_media_to_wx_https(fram_local_path)
+                        url=data[1]
+                        all_wx_frame_pic_urls.append(url)
+                except Exception as e:
+                    pass
             
             table_two.update_one({'_id':_id},{'$set':{"step":end_step,'all_wx_frame_pic_urls':all_wx_frame_pic_urls}})
             logger.success(f"{curent_time}  {safe_title}  下载完成  抽帧完成   上传完成")
