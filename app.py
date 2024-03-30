@@ -220,7 +220,9 @@ def detail_part():
         st.markdown(iframe_table, unsafe_allow_html=True)
 
     # 图片显示
-    pic_list=eval(get_ziduan("all_wx_frame_pic_urls"))
+    pic_list=get_ziduan("all_wx_frame_pic_urls")
+    if '[' in pic_list and type(pic_list)==str:
+        pic_list=eval(pic_list)
 
     pic=pic_list[0]
     response = requests.get(pic)
@@ -242,7 +244,11 @@ def detail_part():
     if st.button("点击提交确认 水印和长度没问题"):
         # 提交修改
         table=get_db()[st.session_state['choose_table']]
-        table.update_one({"_id":_id},{"$set":{"new_shuiyin_bili":new_shuiyin_bili,"new_shijianzhou_delete_length":new_shijianzhou_delete_length}})
+        table.update_one({"_id":_id},{"$set":{
+            "step":3,
+            "new_shuiyin_bili":new_shuiyin_bili,
+            "new_shijianzhou_delete_length":new_shijianzhou_delete_length
+            }})
         table.update_many({"mid":mid},{"$set":{"shuiyin_bili":new_shuiyin_bili,"shijianzhou_delete_length":new_shijianzhou_delete_length}})
 
 
