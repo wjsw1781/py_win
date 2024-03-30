@@ -285,7 +285,7 @@ def main():
 if __name__ == "__main__":
     main()
 """"
-streamlit run /root/py_win/app.py --server.address=0.0.0.0
+nohup    streamlit run /root/py_win/app.py --server.address=0.0.0.0    >/dev/null  2>&1 &
 
 
 """

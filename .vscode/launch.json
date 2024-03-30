@@ -19,10 +19,12 @@
             "name": "debug streamlit",
             "type": "debugpy",
             "request": "launch",
-            "program": "streamlit",  // /home/xx/tmp/venv/bin/streamlit",
+            "program": "/usr/local/bin/streamlit",  // /home/xx/tmp/venv/bin/streamlit",
             "args": [
                 "run",
-                "app.py"
+                "app.py",
+                "server.address",
+                "0.0.0.0 "
             ]
         }
     ]
