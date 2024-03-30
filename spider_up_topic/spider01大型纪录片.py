@@ -89,7 +89,7 @@ def download_video():
     error_step=end_step+video_item.error_reason
 
     table_two.update_many({'step':error_step},{'$set':{'step':from_step}})
-    table_two.update_many({'step':end_step},{'$set':{'step':from_step}})
+    # table_two.update_many({'step':end_step},{'$set':{'step':from_step}})
 
     for ii in table_two.find({'step':from_step}):
         try:
