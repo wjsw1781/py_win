@@ -19,7 +19,7 @@
             "name": "debug streamlit",
             "type": "debugpy",
             "request": "launch",
-            "program": "C:/Users/wangzhiqiang.di/AppData/Roaming/Python/Python38/Scripts/streamlit.exe",  // /home/xx/tmp/venv/bin/streamlit",
+            "program": "C:/python38/Scripts/streamlit.exe",  // /home/xx/tmp/venv/bin/streamlit",
             "args": [
                 "run",
                 "app.py"

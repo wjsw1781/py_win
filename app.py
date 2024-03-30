@@ -68,24 +68,21 @@ def list_part():
     
     st.session_state['data'] = get_data_from_mongodb_by_page(choose_table, page_number, page_size)
     editable_df:pd.DataFrame=st.data_editor(st.session_state['data'] )
+    cp_editable_df=editable_df.copy(deep=True)
 
-    if not(editable_df.equals(st.session_state['data'])) :
-        diff_rows = editable_df.compare(st.session_state['data'])
-        table=db[choose_table]
-        # 更新数据库
-        for index, row in diff_rows.iterrows():
-            obj=row.to_dict()
-            keys=list(obj.keys())
-            col_name=keys[0][0]
-            new_value=obj[keys[0]]
-            old_value=obj[keys[1]]
-            _id=editable_df.loc[index]['_id']
-            print( f'{_id}    {col_name}  {old_value}---->{new_value}', )
-            table.update_one({'_id': _id}, {'$set': {col_name: new_value}})
-        
+    # 页面发生了修改
+    if not editable_df.equals(cp_editable_df):
+        diff = cp_editable_df.compare(editable_df)
+        differences = {}
+        for column in diff.columns:
+            changed_rows = diff[diff[column] != 0].index
+            for row in changed_rows:
+                differences[row] = {'editable_df': editable_df.loc[row].to_dict(), 'cp_editable_df': cp_editable_df.loc[row].to_dict()}
 
-        # 保持最新状态
-        st.session_state['data']=editable_df
+        print(differences)
+
+
+
 
 
 # 详情页
