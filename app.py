@@ -288,4 +288,7 @@ if __name__ == "__main__":
 nohup    streamlit run /root/py_win/app.py --server.address=0.0.0.0    >/dev/null  2>&1 &
 
 
+nohup    streamlit run app.py --server.address=0.0.0.0    >/dev/null  2>&1 &
+
+
 """
