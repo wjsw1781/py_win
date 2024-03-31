@@ -24,8 +24,14 @@
             "args": [
                 "run",
                 "app.py",
-                "server.address",
-                "0.0.0.0 "
+                "--server.address",
+                "0.0.0.0",
+                "--browser.serverAddress",
+                "0.0.0.0",
+                "--server.enableWebsocketCompression",
+                "true",
+                "--global.developmentMode",
+                "false",
             ]
         }
     ]
