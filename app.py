@@ -262,7 +262,7 @@ def detail_part():
 
 
 
-def main():
+def main(*args):
     # 侧边栏
     db_tables()
    
@@ -282,8 +282,9 @@ def main():
     pass
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
+
 """"
 nohup    streamlit run /root/py_win/app.py --server.address=0.0.0.0    >/dev/null  2>&1 &
 
@@ -296,5 +297,8 @@ streamlit run /root/py_win/app.py --server.address 139.196.158.152   --browser.s
 streamlit run /root/py_win/app.py --server.address 0.0.0.0  --browser.serverAddress 139.196.158.152
 
 streamlit run /root/py_win/app.py --server.address 0.0.0.0 --browser.serverAddress 139.196.158.152 --server.enableWebsocketCompression true
+
+nohup    streamlit run app.py --server.address=0.0.0.0    >/dev/null  2>&1 &
+
 
 """

@@ -19,12 +19,19 @@
             "name": "debug streamlit",
             "type": "debugpy",
             "request": "launch",
-            "program": "/usr/local/bin/streamlit",  // /home/xx/tmp/venv/bin/streamlit",
+            // "program": "/usr/local/bin/streamlit",  // /home/xx/tmp/venv/bin/streamlit",
+            "program": "C:/python38/Scripts/streamlit.exe",  // /home/xx/tmp/venv/bin/streamlit",
             "args": [
                 "run",
                 "app.py",
-                "server.address",
-                "0.0.0.0 "
+                "--server.address",
+                "0.0.0.0",
+                "--browser.serverAddress",
+                "0.0.0.0",
+                "--server.enableWebsocketCompression",
+                "true",
+                "--global.developmentMode",
+                "false",
             ]
         }
     ]
