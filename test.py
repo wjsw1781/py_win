@@ -18,6 +18,7 @@ def get_request(url, proxies=None, retries=3,**kargs):
     logger.error(f'请求出错: {exception} {url}')
     return None
 
-
+res=get_request('https://ipinfo.io/json')
+print(res.text)
 
 
