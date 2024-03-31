@@ -30,8 +30,6 @@
                 "0.0.0.0",
                 "--server.enableWebsocketCompression",
                 "true",
-                "--global.developmentMode",
-                "false",
             ]
         }
     ]
